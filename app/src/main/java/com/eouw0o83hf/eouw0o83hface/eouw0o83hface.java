@@ -216,8 +216,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             if(mAmbient) {
                 mBackgroundPaint.setShader(null);
                 mBackgroundPaint.setColor(Color.BLACK);
-            } else {
-                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), 0xff2980b9, 0xff2c3e50, Shader.TileMode.MIRROR));
+            } else if(boundsHeight != null) {
+                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, boundsHeight, 0xff30307e, 0xff0f0f43, Shader.TileMode.MIRROR));
             }
 
             // Whether the timer should be running depends on whether we're visible (as well as
@@ -225,7 +225,7 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             updateTimer();
         }
 
-
+        Integer boundsHeight = null;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -238,6 +238,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 //            } else {
 //                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), 0xff2980b9, 0xff2c3e50, Shader.TileMode.MIRROR));
 //            }
+            if(boundsHeight == null)
+                boundsHeight = bounds.height();
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
