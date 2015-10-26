@@ -242,9 +242,10 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                 boundsHeight = bounds.height();
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
-            // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             mTime.setToNow();
-            String text = String.format("%d:%02d", mTime.hour % 12, mTime.minute);
+
+            // Goofy modulo math to use AM/PM times and get 0:00 to render as 12:00
+            String text = String.format("%d:%02d", ((mTime.hour + 11) % 12) + 1, mTime.minute);
             String dayText = String.format("%s %02d", new DateFormatSymbols().getMonths()[mTime.month].substring(0, 3), mTime.monthDay);
 
 //            String text = mAmbient
