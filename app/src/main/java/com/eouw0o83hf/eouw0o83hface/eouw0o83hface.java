@@ -36,6 +36,7 @@ import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
@@ -56,7 +57,7 @@ public class eouw0o83hface extends CanvasWatchFaceService {
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
      * displayed in interactive mode.
      */
-    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
+    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.MILLISECONDS.toMillis(80);
 
     /**
      * Handler message id for updating the time periodically in interactive mode.
@@ -212,13 +213,17 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                 invalidate();
             }
 
-            // Draw the background.
-            if(mAmbient) {
-                mBackgroundPaint.setShader(null);
-                mBackgroundPaint.setColor(Color.BLACK);
-            } else if(boundsHeight != null) {
-                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, boundsHeight, 0xff30307e, 0xff0f0f43, Shader.TileMode.MIRROR));
-            }
+//            // Draw the background.
+//            if(mAmbient) {
+////                mBackgroundPaint.setShader(null);
+////                mBackgroundPaint.setColor(Color.BLACK);
+//            } else if(boundsHeight != null) {
+////                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, boundsHeight, 0xff30307e, 0xff0f0f43, Shader.TileMode.MIRROR));
+//            }
+
+//            if(!mAmbient) {
+//                topColor = 0xff2980b9;
+//            }
 
             // Whether the timer should be running depends on whether we're visible (as well as
             // whether we're in ambient mode), so we may need to start or stop the timer.
@@ -226,18 +231,23 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         }
 
         Integer boundsHeight = null;
+        int topColor = 0xff2980b9;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
-//
-//            // Draw the background.
-//            if(mAmbient) {
-//                mBackgroundPaint.setShader(null);
-//                mBackgroundPaint.setColor(Color.BLACK);
-//            } else {
-//                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), 0xff2980b9, 0xff2c3e50, Shader.TileMode.MIRROR));
-//            }
+            // Draw the background.
+            if(mAmbient) {
+                mBackgroundPaint.setShader(null);
+                mBackgroundPaint.setColor(Color.BLACK);
+            } else {
+                float[] hsv = new float[3];
+                Color.colorToHSV(topColor, hsv);
+                hsv[0] = (hsv[0] + 0.5f) % 360;
+                topColor = Color.HSVToColor(hsv);
+
+                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), topColor, 0xff2c3e50, Shader.TileMode.MIRROR));
+            }
             if(boundsHeight == null)
                 boundsHeight = bounds.height();
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
