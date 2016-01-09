@@ -227,12 +227,13 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 //            }
 
             // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
+            // whether we're ien ambient mode), so we may need to start or stop the timer.
             updateTimer();
         }
 
         Integer boundsHeight = null;
         int topColor = 0xff2980b9;
+        int bottomColor = 0xff2c3e50;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -247,7 +248,11 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                 hsv[0] = (hsv[0] + 0.5f) % 360;
                 topColor = Color.HSVToColor(hsv);
 
-                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), topColor, 0xff2c3e50, Shader.TileMode.MIRROR));
+                Color.colorToHSV(bottomColor, hsv);
+                hsv[0] = (hsv[0] + 0.5f) % 360;
+                bottomColor = Color.HSVToColor(hsv);
+
+                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), topColor, bottomColor, Shader.TileMode.MIRROR));
             }
             if(boundsHeight == null)
                 boundsHeight = bounds.height();
