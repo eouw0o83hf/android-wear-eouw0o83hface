@@ -232,8 +232,12 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         }
 
         Integer boundsHeight = null;
-        int topColor = 0xff2980b9;
-        int bottomColor = 0xff2c3e50;
+        //int topColor = 0xff2980b9;
+        int topColor = 0xff2783be;
+        //int bottomColor = 0xff2c3e50;
+        int bottomColor = 0xff44c5a4;
+        //float step = 0.5f;
+        float step = 0.5f;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -245,11 +249,11 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             } else {
                 float[] hsv = new float[3];
                 Color.colorToHSV(topColor, hsv);
-                hsv[0] = (hsv[0] + 0.5f) % 360;
+                hsv[0] = (hsv[0] + step) % 360;
                 topColor = Color.HSVToColor(hsv);
 
                 Color.colorToHSV(bottomColor, hsv);
-                hsv[0] = (hsv[0] + 0.5f) % 360;
+                hsv[0] = (hsv[0] + step) % 360;
                 bottomColor = Color.HSVToColor(hsv);
 
                 mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), topColor, bottomColor, Shader.TileMode.MIRROR));
