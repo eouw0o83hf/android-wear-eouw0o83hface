@@ -19,7 +19,7 @@ public class VisualStateManager {
     }
 
     private long _changeTime = System.currentTimeMillis();
-    private static final float _stateChangeMillis = 1000;
+    private static final float _stateChangeMillis = 500;
     private Timer _currentTimer;
 
     private VisualState _state = VisualState.Interactive;

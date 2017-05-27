@@ -40,6 +40,8 @@ import android.view.WindowInsets;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -228,26 +230,133 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                 mDatePaint.setAntiAlias(to != VisualStateManager.VisualState.Ambient);
             }
 
+            switch (to) {
+                case Ambient:
+
+                    int color1 = 0x59abe3;
+                    int color2 = 0xf3c13a;
+                    int color3 = 0xf22613;
+
+                    if(shapesInitialized) {
+                        for (BackgroundShape shape : shapes) {
+                            shape.SetColor(RandomMix(color1, color2, color3));
+                        }
+                    }
+
+                case LeavingInteractive:
+                    if(shapesInitialized) {
+                        for (BackgroundShape shape : shapes) {
+                            shape.SetActive(false);
+                        }
+                    }
+
+                    break;
+
+                case Interactive:
+                case EnteringInteractive:
+                    if(shapesInitialized) {
+                        for (BackgroundShape shape : shapes) {
+                            shape.SetActive(true);
+                        }
+                    }
+                    break;
+            }
+
+
             invalidate();
             updateTimer();
+        }
+
+        Random random = new Random();
+        float grayControl = 0.5f;
+
+        int sections = 7;
+        ArrayList<BackgroundShape> shapes = new ArrayList(sections * sections);
+        boolean shapesInitialized = false;
+
+        private int RandomMix(int color1, int color2, int color3) {
+            int randomIndex = random.nextInt() % 3;
+
+            float mixRatio1 = (randomIndex == 0) ? random.nextFloat() * grayControl : random.nextFloat();
+            float mixRatio2 = (randomIndex == 1) ? random.nextFloat() * grayControl : random.nextFloat();
+            float mixRatio3 = (randomIndex == 2) ? random.nextFloat() * grayControl : random.nextFloat();
+
+            float sum = mixRatio1 + mixRatio2 + mixRatio3;
+
+            mixRatio1 /= sum;
+            mixRatio2 /= sum;
+            mixRatio3 /= sum;
+
+            return Color.argb(255,
+                    (int)(mixRatio1 * Color.red(color1) + mixRatio2 * Color.red(color2) + mixRatio3 * Color.red(color3)),
+                    (int)(mixRatio1 * Color.green(color1) + mixRatio2 * Color.green(color2) + mixRatio3 * Color.green(color3)),
+                    (int)(mixRatio1 * Color.blue(color1) + mixRatio2 * Color.blue(color2) + mixRatio3 * Color.blue(color3)));
         }
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
+            if(!shapesInitialized) {
+
+                int height = bounds.height();
+                int width = bounds.width();
+
+                int heightSection = height / sections;
+                int widthSection = width / sections;
+
+                Log.i("Begin!!", "Height: " + String.valueOf(height) + ", width: " + String.valueOf(width));
+
+                for(int i = 0; i < sections; ++i) {
+                    for(int j = 0; j < sections; ++j) {
+                        shapes.add(new BackgroundShape(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
+                    }
+                }
+
+                shapesInitialized = true;
+            }
+
+            Log.i("onDraw!!", "Height: " + String.valueOf(bounds.height()) + ", width: " + String.valueOf(bounds.width()));
+
             // Draw the background.
             if(mStateManager.IsInAmbientMode()) {
-                mBackgroundPaint.setShader(null);
+//                mBackgroundPaint.setShader(null);
                 mBackgroundPaint.setColor(Color.BLACK);
+                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
             } else {
-                float[] hsv = new float[3];
-                Color.colorToHSV(mGradientTopColor, hsv);
-                hsv[0] = (hsv[0] + 0.5f) % 360;
-                mGradientTopColor = Color.HSVToColor(hsv);
 
-                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), mGradientTopColor, mGradientBottomColor, Shader.TileMode.MIRROR));
+                //# Original single rolling gradient
+//                float[] hsv = new float[3];
+//                Color.colorToHSV(mGradientTopColor, hsv);
+//                hsv[0] = (hsv[0] + 0.5f) % 360;
+//                mGradientTopColor = Color.HSVToColor(hsv);
+//
+//                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), mGradientTopColor, mGradientBottomColor, Shader.TileMode.MIRROR));
+//                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+
+
+//                //# Gradient squares
+//                int sections = 5;
+//                int heightSection = bounds.height() / sections;
+//                int widthSection = bounds.width() / sections;
+//                for(int i = 0; i < sections; ++i) {
+//                    for(int j = 0; j < sections; ++j) {
+//                        float[] hsv = new float[3];
+//                        Color.colorToHSV(mGradientTopColor, hsv);
+//                        hsv[0] = (hsv[0] + 0.5f) % 360;
+//                        mGradientTopColor = Color.HSVToColor(hsv);
+//
+//
+//                        mBackgroundPaint.setShader(new LinearGradient(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1), mGradientTopColor, mGradientBottomColor, Shader.TileMode.MIRROR));
+//                        canvas.drawRect(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1), mBackgroundPaint);
+//                    }
+//                }
+
+
+                for (BackgroundShape shape : shapes) {
+                    shape.Render(canvas, mBackgroundPaint);
+                }
             }
-            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+
 
             mTime.setToNow();
 
@@ -255,9 +364,6 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             String text = String.format("%d:%02d", ((mTime.hour + 11) % 12) + 1, mTime.minute);
             String dayText = String.format("%s %02d", new DateFormatSymbols().getMonths()[mTime.month].substring(0, 3), mTime.monthDay);
 
-//            String text = mAmbient
-//                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-//                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
             mXOffset = bounds.width() / 2;
             //mYOffset = bounds.height() / 2;
             mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
