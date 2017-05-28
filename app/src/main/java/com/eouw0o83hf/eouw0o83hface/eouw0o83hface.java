@@ -68,6 +68,13 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         return new Engine();
     }
 
+    public enum BackgroundShapeStatus {
+        NotInitialized,
+        Neutral,
+        TurningOn,
+        TurningOff
+    }
+
     @SuppressWarnings("deprecation")
     private class Engine extends CanvasWatchFaceService.Engine {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
@@ -237,28 +244,27 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                     int color2 = 0xf3c13a;
                     int color3 = 0xf22613;
 
-                    if(shapesInitialized) {
+                    if(shapeStatus != BackgroundShapeStatus.NotInitialized) {
                         for (BackgroundShape shape : shapes) {
                             shape.SetColor(RandomMix(color1, color2, color3));
+                        }
+
+                        for(int i = shapes.size() - 1; i >= 0; --i) {
+                            int targetIndex = random.nextInt(shapes.size() - 1);
+                            BackgroundShape holder = shapes.get(targetIndex);
+                            shapes.set(targetIndex, shapes.get(i));
+                            shapes.set(i, holder);
                         }
                     }
 
                 case LeavingInteractive:
-                    if(shapesInitialized) {
-                        for (BackgroundShape shape : shapes) {
-                            shape.SetActive(false);
-                        }
-                    }
+                    shapeStatus = BackgroundShapeStatus.TurningOff;
 
                     break;
 
                 case Interactive:
                 case EnteringInteractive:
-                    if(shapesInitialized) {
-                        for (BackgroundShape shape : shapes) {
-                            shape.SetActive(true);
-                        }
-                    }
+                    shapeStatus = BackgroundShapeStatus.TurningOn;
                     break;
             }
 
@@ -272,7 +278,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 
         int sections = 7;
         ArrayList<BackgroundShape> shapes = new ArrayList(sections * sections);
-        boolean shapesInitialized = false;
+        BackgroundShapeStatus shapeStatus = BackgroundShapeStatus.NotInitialized;
+
 
         private int RandomMix(int color1, int color2, int color3) {
             int randomIndex = random.nextInt() % 3;
@@ -296,29 +303,53 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
-            if(!shapesInitialized) {
+            switch (shapeStatus) {
+                case NotInitialized:
+                    int height = bounds.height();
+                    int width = bounds.width();
 
-                int height = bounds.height();
-                int width = bounds.width();
+                    int heightSection = height / sections;
+                    int widthSection = width / sections;
 
-                int heightSection = height / sections;
-                int widthSection = width / sections;
+                    Log.i("Begin!!", "Height: " + String.valueOf(height) + ", width: " + String.valueOf(width));
 
-                Log.i("Begin!!", "Height: " + String.valueOf(height) + ", width: " + String.valueOf(width));
-
-                for(int i = 0; i < sections; ++i) {
-                    for(int j = 0; j < sections; ++j) {
-                        shapes.add(new BackgroundShape(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
+                    for(int i = 0; i < sections; ++i) {
+                        for(int j = 0; j < sections; ++j) {
+                            shapes.add(new BackgroundShape(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
+                        }
                     }
-                }
 
-                shapesInitialized = true;
+                    shapeStatus = BackgroundShapeStatus.Neutral;
+                    break;
+
+                case TurningOn:
+                case TurningOff:
+
+                    boolean activeToggle = shapeStatus == BackgroundShapeStatus.TurningOn;
+                    int switchedCount = 0;
+                    for(int i = 0 ; i < shapes.size(); ++i) {
+                        BackgroundShape s = shapes.get(i);
+                        if(s.GetActive() != activeToggle) {
+                            s.SetActive(activeToggle);
+                            ++switchedCount;
+                            if(switchedCount >= sections) {
+                                break;
+                            }
+                        } else if(i == shapes.size() - 1) {
+                            shapeStatus = BackgroundShapeStatus.Neutral;
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
             }
+
 
             Log.i("onDraw!!", "Height: " + String.valueOf(bounds.height()) + ", width: " + String.valueOf(bounds.width()));
 
             // Draw the background.
-            if(mStateManager.IsInAmbientMode()) {
+            if(mStateManager.IsInAmbientMode() && shapeStatus != BackgroundShapeStatus.TurningOff) {
 //                mBackgroundPaint.setShader(null);
                 mBackgroundPaint.setColor(Color.BLACK);
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
@@ -366,8 +397,14 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 
             mXOffset = bounds.width() / 2;
             //mYOffset = bounds.height() / 2;
-            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
-            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
+//            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
+//            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
+
+            mTextPaint.setColor(Color.WHITE);
+            mDatePaint.setColor(Color.WHITE);
+
+//            mTextPaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
+//            mDatePaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
 
             canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
             canvas.drawText(dayText, mXOffset, mYOffset / 2, mDatePaint);
