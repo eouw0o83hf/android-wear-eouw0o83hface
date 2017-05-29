@@ -18,11 +18,16 @@ public class BackgroundShape {
     private float _right;
     private float _bottom;
 
-    private int _shapeColor;
+    private int _shapeColor = 0;
+    private int _nextColor = 0;
     private boolean _isActive;
 
-    public void SetColor(int color) {
-        _shapeColor = color;
+    public void PushColor(int color) {
+        if(_shapeColor == 0) {
+            _shapeColor = color;
+        } else {
+            _nextColor = color;
+        }
     }
 
     public boolean GetActive() {
@@ -31,6 +36,9 @@ public class BackgroundShape {
 
     public void SetActive(boolean isActive) {
         _isActive = isActive;
+        if(!_isActive && _nextColor != 0) {
+            _shapeColor = _nextColor;
+        }
     }
 
     public void Render(Canvas canvas, Paint sharedPaint) {

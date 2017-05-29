@@ -45,6 +45,8 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import static com.eouw0o83hf.eouw0o83hface.DeterministicStateManager.VisualState.Ambient;
+
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
  * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
@@ -62,6 +64,14 @@ public class eouw0o83hface extends CanvasWatchFaceService {
      * Handler message id for updating the time periodically in interactive mode.
      */
     private static final int MSG_UPDATE_TIME = 0;
+
+
+    Random random = new Random();
+    float grayControl = 0.5f;
+
+    int sections = 6;
+    ArrayList<BackgroundShape> shapes = new ArrayList(sections * sections);
+    BackgroundShapeStatus shapeStatus = BackgroundShapeStatus.NotInitialized;
 
     @Override
     public Engine onCreateEngine() {
@@ -87,7 +97,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             }
         };
 
-        final VisualStateManager mStateManager = new VisualStateManager() {
+        //final VisualStateManager mStateManager = new VisualStateManager() {
+        final DeterministicStateManager mStateManager = new DeterministicStateManager(shapes) {
             @Override
             protected void ChangeModeTo(VisualState state) {
                 VisualState from = GetState();
@@ -227,44 +238,32 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             mStateManager.AmbientModeChanged(inAmbientMode);
         }
 
-        private void HandleStateChange(VisualStateManager.VisualState from, VisualStateManager.VisualState to) {
+        private void HandleStateChange(DeterministicStateManager.VisualState from, DeterministicStateManager.VisualState to) {
             if(from == to) {
                 return;
             }
 
             if(mLowBitAmbient) {
-                mTextPaint.setAntiAlias(to != VisualStateManager.VisualState.Ambient);
-                mDatePaint.setAntiAlias(to != VisualStateManager.VisualState.Ambient);
+                mTextPaint.setAntiAlias(to != DeterministicStateManager.VisualState.Ambient);
+                mDatePaint.setAntiAlias(to != DeterministicStateManager.VisualState.Ambient);
             }
 
             switch (to) {
                 case Ambient:
-
-                    int color1 = 0x59abe3;
-                    int color2 = 0xf3c13a;
-                    int color3 = 0xf22613;
-
                     if(shapeStatus != BackgroundShapeStatus.NotInitialized) {
-                        for (BackgroundShape shape : shapes) {
-                            shape.SetColor(RandomMix(color1, color2, color3));
-                        }
-
-                        for(int i = shapes.size() - 1; i >= 0; --i) {
-                            int targetIndex = random.nextInt(shapes.size() - 1);
-                            BackgroundShape holder = shapes.get(targetIndex);
-                            shapes.set(targetIndex, shapes.get(i));
-                            shapes.set(i, holder);
-                        }
+                        RandomizeBackground();
                     }
+                    break;
 
                 case LeavingInteractive:
                     shapeStatus = BackgroundShapeStatus.TurningOff;
-
                     break;
 
-                case Interactive:
                 case EnteringInteractive:
                     shapeStatus = BackgroundShapeStatus.TurningOn;
+                    break;
+
+                default:
                     break;
             }
 
@@ -273,13 +272,25 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             updateTimer();
         }
 
-        Random random = new Random();
-        float grayControl = 0.5f;
 
-        int sections = 7;
-        ArrayList<BackgroundShape> shapes = new ArrayList(sections * sections);
-        BackgroundShapeStatus shapeStatus = BackgroundShapeStatus.NotInitialized;
+        private void RandomizeBackground() {
+            int color1 = 0x59abe3;
+            int color2 = 0xf3c13a;
+            int color3 = 0xf22613;
 
+            // Change color
+            for (BackgroundShape shape : shapes) {
+                shape.PushColor(RandomMix(color1, color2, color3));
+            }
+
+            // Shuffle
+            for(int i = shapes.size() - 1; i >= 0; --i) {
+                int targetIndex = random.nextInt(shapes.size() - 1);
+                BackgroundShape holder = shapes.get(targetIndex);
+                shapes.set(targetIndex, shapes.get(i));
+                shapes.set(i, holder);
+            }
+        }
 
         private int RandomMix(int color1, int color2, int color3) {
             int randomIndex = random.nextInt() % 3;
@@ -303,6 +314,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
+            boolean stateRefreshRequired = false;
+
             switch (shapeStatus) {
                 case NotInitialized:
                     int height = bounds.height();
@@ -311,13 +324,13 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                     int heightSection = height / sections;
                     int widthSection = width / sections;
 
-                    Log.i("Begin!!", "Height: " + String.valueOf(height) + ", width: " + String.valueOf(width));
-
                     for(int i = 0; i < sections; ++i) {
                         for(int j = 0; j < sections; ++j) {
                             shapes.add(new BackgroundShape(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
                         }
                     }
+
+                    RandomizeBackground();
 
                     shapeStatus = BackgroundShapeStatus.Neutral;
                     break;
@@ -332,11 +345,13 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                         if(s.GetActive() != activeToggle) {
                             s.SetActive(activeToggle);
                             ++switchedCount;
+                            stateRefreshRequired = true;
                             if(switchedCount >= sections) {
                                 break;
                             }
                         } else if(i == shapes.size() - 1) {
                             shapeStatus = BackgroundShapeStatus.Neutral;
+                            break;
                         }
                     }
                     break;
@@ -345,11 +360,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                     break;
             }
 
-
-            Log.i("onDraw!!", "Height: " + String.valueOf(bounds.height()) + ", width: " + String.valueOf(bounds.width()));
-
             // Draw the background.
-            if(mStateManager.IsInAmbientMode() && shapeStatus != BackgroundShapeStatus.TurningOff) {
+            if(mStateManager.IsInAmbientMode()) {
 //                mBackgroundPaint.setShader(null);
                 mBackgroundPaint.setColor(Color.BLACK);
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
@@ -388,6 +400,9 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                 }
             }
 
+            if(stateRefreshRequired) {
+                mStateManager.RefreshStateFromBackground();
+            }
 
             mTime.setToNow();
 
