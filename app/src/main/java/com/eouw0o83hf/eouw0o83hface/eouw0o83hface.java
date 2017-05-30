@@ -274,13 +274,16 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 
 
         private void RandomizeBackground() {
-            int color1 = 0x59abe3;
-            int color2 = 0xf3c13a;
-            int color3 = 0xf22613;
+            float saturation = 0.35f;
+            float brightness = 0.76f;
 
             // Change color
             for (BackgroundShape shape : shapes) {
-                shape.PushColor(RandomMix(color1, color2, color3));
+
+                float hue = random.nextInt(360);
+                float[] hsv = { hue, saturation, brightness };
+                int randomColor = Color.HSVToColor(hsv);
+                shape.PushColor(randomColor);
             }
 
             // Shuffle
@@ -290,25 +293,6 @@ public class eouw0o83hface extends CanvasWatchFaceService {
                 shapes.set(targetIndex, shapes.get(i));
                 shapes.set(i, holder);
             }
-        }
-
-        private int RandomMix(int color1, int color2, int color3) {
-            int randomIndex = random.nextInt() % 3;
-
-            float mixRatio1 = (randomIndex == 0) ? random.nextFloat() * grayControl : random.nextFloat();
-            float mixRatio2 = (randomIndex == 1) ? random.nextFloat() * grayControl : random.nextFloat();
-            float mixRatio3 = (randomIndex == 2) ? random.nextFloat() * grayControl : random.nextFloat();
-
-            float sum = mixRatio1 + mixRatio2 + mixRatio3;
-
-            mixRatio1 /= sum;
-            mixRatio2 /= sum;
-            mixRatio3 /= sum;
-
-            return Color.argb(255,
-                    (int)(mixRatio1 * Color.red(color1) + mixRatio2 * Color.red(color2) + mixRatio3 * Color.red(color3)),
-                    (int)(mixRatio1 * Color.green(color1) + mixRatio2 * Color.green(color2) + mixRatio3 * Color.green(color3)),
-                    (int)(mixRatio1 * Color.blue(color1) + mixRatio2 * Color.blue(color2) + mixRatio3 * Color.blue(color3)));
         }
 
         @Override
