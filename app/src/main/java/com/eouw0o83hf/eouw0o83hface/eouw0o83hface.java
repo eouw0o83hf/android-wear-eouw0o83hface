@@ -70,7 +70,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
     float grayControl = 0.5f;
 
 
-    BackgroundShapeManager shapeManager = new PlaidBackgroundStateManager();
+    //BackgroundShapeManager shapeManager = new PlaidBackgroundStateManager();
+    BackgroundShapeManager shapeManager = new RandomPolygonBackgroundShapeManager();
 
     @Override
     public Engine onCreateEngine() {
