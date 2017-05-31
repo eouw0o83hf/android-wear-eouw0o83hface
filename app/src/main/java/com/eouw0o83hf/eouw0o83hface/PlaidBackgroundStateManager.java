@@ -10,12 +10,12 @@ import java.util.Random;
 public class PlaidBackgroundStateManager implements BackgroundShapeManager {
 
     int sections = 6;
-    ArrayList<BackgroundShape> shapes = new ArrayList(sections * sections);
+    ArrayList<BackgroundSquare> shapes = new ArrayList(sections * sections);
 
     StateChangeStatus _state = StateChangeStatus.NotInitialized;
     Random random = new Random();
 
-    public Collection<BackgroundShape> getBackgroundShapes() {
+    public Collection<? extends BackgroundShape> getBackgroundShapes() {
         return shapes;
     }
 
@@ -32,7 +32,7 @@ public class PlaidBackgroundStateManager implements BackgroundShapeManager {
 
         for(int i = 0; i < sections; ++i) {
             for(int j = 0; j < sections; ++j) {
-                shapes.add(new BackgroundShape(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
+                shapes.add(new BackgroundSquare(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
             }
         }
 
@@ -54,18 +54,18 @@ public class PlaidBackgroundStateManager implements BackgroundShapeManager {
         float brightness = 0.76f;
 
         // Change color
-        for (BackgroundShape shape : shapes) {
+        for (BackgroundSquare square : shapes) {
 
             float hue = random.nextInt(360);
             float[] hsv = { hue, saturation, brightness };
             int randomColor = Color.HSVToColor(hsv);
-            shape.PushColor(randomColor);
+            square.PushColor(randomColor);
         }
 
         // Shuffle
         for(int i = shapes.size() - 1; i >= 0; --i) {
             int targetIndex = random.nextInt(shapes.size() - 1);
-            BackgroundShape holder = shapes.get(targetIndex);
+            BackgroundSquare holder = shapes.get(targetIndex);
             shapes.set(targetIndex, shapes.get(i));
             shapes.set(i, holder);
         }
@@ -81,7 +81,7 @@ public class PlaidBackgroundStateManager implements BackgroundShapeManager {
         boolean activeToggle = _state == StateChangeStatus.TurningOn;
         int switchedCount = 0;
         for(int i = 0 ; i < shapes.size(); ++i) {
-            BackgroundShape s = shapes.get(i);
+            BackgroundSquare s = shapes.get(i);
             if(s.GetActive() != activeToggle) {
                 s.SetActive(activeToggle);
                 ++switchedCount;

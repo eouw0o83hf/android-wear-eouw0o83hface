@@ -11,7 +11,7 @@ import java.util.Random;
 // BackgroundShape. It might be better served as an abstract class in order to provider
 // more helpers
 public interface BackgroundShapeManager {
-    Collection<BackgroundShape> getBackgroundShapes();
+    Collection<? extends BackgroundShape> getBackgroundShapes();
 
     void initialize(Rect bounds);
     void randomize();

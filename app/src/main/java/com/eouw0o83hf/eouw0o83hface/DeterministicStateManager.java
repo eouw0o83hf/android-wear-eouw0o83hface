@@ -13,9 +13,9 @@ public class DeterministicStateManager {
         LeavingInteractive
     }
 
-    private final Collection<BackgroundShape> _background;
+    private final Collection<? extends BackgroundShape> _background;
 
-    public DeterministicStateManager(Collection<BackgroundShape> background) {
+    public DeterministicStateManager(Collection<? extends BackgroundShape> background) {
         _background = background;
         _state = VisualState.Interactive;
     }
