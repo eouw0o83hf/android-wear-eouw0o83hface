@@ -69,21 +69,14 @@ public class eouw0o83hface extends CanvasWatchFaceService {
     Random random = new Random();
     float grayControl = 0.5f;
 
-    int sections = 6;
-    ArrayList<BackgroundShape> shapes = new ArrayList(sections * sections);
-    BackgroundShapeStatus shapeStatus = BackgroundShapeStatus.NotInitialized;
+
+    BackgroundShapeManager shapeManager = new PlaidBackgroundStateManager();
 
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
-    public enum BackgroundShapeStatus {
-        NotInitialized,
-        Neutral,
-        TurningOn,
-        TurningOff
-    }
 
     @SuppressWarnings("deprecation")
     private class Engine extends CanvasWatchFaceService.Engine {
@@ -98,7 +91,7 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         };
 
         //final VisualStateManager mStateManager = new VisualStateManager() {
-        final DeterministicStateManager mStateManager = new DeterministicStateManager(shapes) {
+        final DeterministicStateManager mStateManager = new DeterministicStateManager(shapeManager.getBackgroundShapes()) {
             @Override
             protected void ChangeModeTo(VisualState state) {
                 VisualState from = GetState();
@@ -250,17 +243,15 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 
             switch (to) {
                 case Ambient:
-                    if(shapeStatus != BackgroundShapeStatus.NotInitialized) {
-                        RandomizeBackground();
-                    }
+                    shapeManager.randomize();
                     break;
 
                 case LeavingInteractive:
-                    shapeStatus = BackgroundShapeStatus.TurningOff;
+                    shapeManager.incrementState(BackgroundShapeManager.StateChangeStatus.TurningOff);
                     break;
 
                 case EnteringInteractive:
-                    shapeStatus = BackgroundShapeStatus.TurningOn;
+                    shapeManager.incrementState(BackgroundShapeManager.StateChangeStatus.TurningOn);
                     break;
 
                 default:
@@ -272,72 +263,16 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             updateTimer();
         }
 
-
-        private void RandomizeBackground() {
-            float saturation = 0.35f;
-            float brightness = 0.76f;
-
-            // Change color
-            for (BackgroundShape shape : shapes) {
-
-                float hue = random.nextInt(360);
-                float[] hsv = { hue, saturation, brightness };
-                int randomColor = Color.HSVToColor(hsv);
-                shape.PushColor(randomColor);
-            }
-
-            // Shuffle
-            for(int i = shapes.size() - 1; i >= 0; --i) {
-                int targetIndex = random.nextInt(shapes.size() - 1);
-                BackgroundShape holder = shapes.get(targetIndex);
-                shapes.set(targetIndex, shapes.get(i));
-                shapes.set(i, holder);
-            }
-        }
-
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
+            shapeManager.initialize(bounds);
             boolean stateRefreshRequired = false;
 
-            switch (shapeStatus) {
-                case NotInitialized:
-                    int height = bounds.height();
-                    int width = bounds.width();
-
-                    int heightSection = height / sections;
-                    int widthSection = width / sections;
-
-                    for(int i = 0; i < sections; ++i) {
-                        for(int j = 0; j < sections; ++j) {
-                            shapes.add(new BackgroundShape(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1)));
-                        }
-                    }
-
-                    RandomizeBackground();
-
-                    shapeStatus = BackgroundShapeStatus.Neutral;
-                    break;
-
-                case TurningOn:
-                case TurningOff:
-
-                    boolean activeToggle = shapeStatus == BackgroundShapeStatus.TurningOn;
-                    int switchedCount = 0;
-                    for(int i = 0 ; i < shapes.size(); ++i) {
-                        BackgroundShape s = shapes.get(i);
-                        if(s.GetActive() != activeToggle) {
-                            s.SetActive(activeToggle);
-                            ++switchedCount;
-                            stateRefreshRequired = true;
-                            if(switchedCount >= sections) {
-                                break;
-                            }
-                        } else if(i == shapes.size() - 1) {
-                            shapeStatus = BackgroundShapeStatus.Neutral;
-                            break;
-                        }
-                    }
+            switch (mStateManager.GetState()) {
+                case LeavingInteractive:
+                case EnteringInteractive:
+                    stateRefreshRequired = shapeManager.turnOnOrOff();
                     break;
 
                 default:
@@ -379,7 +314,7 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 //                }
 
 
-                for (BackgroundShape shape : shapes) {
+                for (BackgroundShape shape : shapeManager.getBackgroundShapes()) {
                     shape.Render(canvas, mBackgroundPaint);
                 }
             }
