@@ -31,7 +31,7 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
     private class AbstractBackgroundPolygon implements BackgroundShape {
 
-        private final ArrayList<Foint> _verteces;
+        private ArrayList<Foint> _verteces;
         private int _color;
         private boolean _isActive = true;
 
@@ -47,6 +47,11 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
             return _verteces;
         }
 
+        public void SetVerteces(ArrayList<Foint> verteces) {
+            _verteces = verteces;
+        }
+
+        @Override
         public void Render(Canvas canvas, Paint sharedPaint) {
             if(_bounds == null) {
                 return;
@@ -60,7 +65,7 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
             }
             perimiter.lineTo(_verteces.get(0).X, _verteces.get(0).Y);
 
-            sharedPaint.setColor(_color);
+            sharedPaint.setColor(_isActive ? _color : Color.BLACK);
             canvas.drawPath(perimiter, sharedPaint);
         }
 
@@ -92,7 +97,9 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
         private Random random = new Random();
 
-        public void Initialize() {
+        public void Initialize(boolean isActive) {
+
+            Log.i("initialize", "Called");
 
             ArrayList<Foint> verteces = new ArrayList<>(Arrays.asList(
                     new Foint(_bounds.left, _bounds.top),
@@ -104,14 +111,14 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 //            polygons = new ArrayList<>(1);
 //            polygons.add(new Polygon(verteces)));
 
-            polygonThings = new ArrayList<>(1);
-            polygonThings.add(new AbstractBackgroundPolygon(verteces));
+            ArrayList<AbstractBackgroundPolygon> updatedPolygonThings = new ArrayList<>(1);
+            updatedPolygonThings.add(new AbstractBackgroundPolygon(verteces));
 
             for(int targetIndex = 0; targetIndex < NumberOfShapes - 1; ++targetIndex) {
 
-                int realTargetIndex = random.nextInt(polygonThings.size());
+                int realTargetIndex = random.nextInt(updatedPolygonThings.size());
 
-                AbstractBackgroundPolygon target = polygonThings.get(realTargetIndex);
+                AbstractBackgroundPolygon target = updatedPolygonThings.get(realTargetIndex);
 //                Polygon target = polygons.get(realTargetIndex);
 
                 ArrayList<Foint> targetVerteces = target.GetVerteces();
@@ -153,11 +160,6 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 polygon1Foints.add(newPoint2);
                 Polygon newPolygon1 = new Polygon(polygon1Foints);
 
-                Log.i("Polygon", "1");
-                for (Foint bound : newPolygon1.Bounds) {
-                    Log.d("Polygon1 Bounds", "(" + bound.X + ", " + bound.Y + ")");
-                }
-
                 ArrayList<Foint> polygon2Foints = new ArrayList<>(1);
                 polygon2Foints.add(newPoint2);
                 for (int i = (edge2 + 1) % targetVerteces.size(); true; i = (i + 1) % targetVerteces.size()) {
@@ -169,17 +171,35 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 polygon2Foints.add(newPoint1);
                 Polygon newPolygon2 = new Polygon(polygon2Foints);
 
-                Log.i("Polygon", "2");
-                for (Foint bound : newPolygon2.Bounds) {
-                    Log.d("Polygon2 Bounds", "(" + bound.X + ", " + bound.Y + ")");
+
+                updatedPolygonThings.remove(realTargetIndex);
+                updatedPolygonThings.add(new AbstractBackgroundPolygon(newPolygon1.Bounds));
+                updatedPolygonThings.add(new AbstractBackgroundPolygon(newPolygon2.Bounds));
+            }
+
+            Log.i("initialize", "Initialized shapes to " + polygonThings.size());
+
+            int[] colors = new int[] {
+                    0xFF2196F3,
+                    0xFF8BC34A,
+                    0xFFFF5722,
+                    0xFF9C27B0,
+                    0xFF673AB7,
+                    0xFF3F51B5,
+                    0xFFFF9800,
+                    0xFF607D8B
+            };
+            for(int i = 0; i < updatedPolygonThings.size(); ++i) {
+                // Reverse them so rendering goes small-to-large
+                AbstractBackgroundPolygon source = updatedPolygonThings.get(updatedPolygonThings.size() - i - 1);
+
+                if(polygonThings.size() <= i) {
+                    polygonThings.add(new AbstractBackgroundPolygon(source.GetVerteces()));
+                } else {
+                    polygonThings.get(i).SetVerteces(source.GetVerteces());
                 }
 
-                polygonThings.remove(realTargetIndex);
-                polygonThings.add(new AbstractBackgroundPolygon(newPolygon1.Bounds));
-                polygonThings.add(new AbstractBackgroundPolygon(newPolygon2.Bounds));
-//                polygons.remove(realTargetIndex);
-//                polygons.add(newPolygon1);
-//                polygons.add(newPolygon2);
+                polygonThings.get(i).SetColor(colors[i]);
             }
         }
 
@@ -188,6 +208,8 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
             if(_bounds == null) {
                 return;
             }
+
+            Log.i("Shape thing rendering", "I should not be called");
 
             sharedPaint.setColor(Color.BLACK);
             canvas.drawRect(_bounds, sharedPaint);
@@ -268,21 +290,22 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
     @Override
     public Collection<? extends BackgroundShape> getBackgroundShapes() {
-        return new ArrayList(shapeList);
+        //return new ArrayList(shapeList);
+        return shape.polygonThings;
     }
 
     @Override
     public void initialize(Rect bounds) {
         if(_state == StateChangeStatus.NotInitialized) {
             _bounds = bounds;
-            shape.Initialize();
+            shape.Initialize(true);
             _state = StateChangeStatus.Neutral;
         }
     }
 
     @Override
     public void randomize() {
-        shape.Initialize();
+        shape.Initialize(false);
     }
 
     @Override
@@ -291,17 +314,24 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
         boolean stateRefreshRequired = false;
         boolean activeToggle = _state == StateChangeStatus.TurningOn;
-        for(int i = 0 ; i < shapeList.size(); ++i) {
-            MyBackgroundSomething s = shapeList.get(i);
+
+        Log.d("turnOnOrOff", "called: " + activeToggle);
+
+        for(int i = 0 ; i < shape.polygonThings.size(); ++i) {
+            AbstractBackgroundPolygon s = shape.polygonThings.get(i);
+            Log.d("turnOnOrOff", "item " + i + ": " + s.GetActive());
             if(s.GetActive() != activeToggle) {
                 s.SetActive(activeToggle);
                 stateRefreshRequired = true;
                 break;
-            } else if(i == shapeList.size() - 1) {
+            } else if(i == shape.polygonThings.size() - 1) {
                 incrementState(StateChangeStatus.Neutral);
                 break;
             }
         }
+
+        Log.d("turnOnOrOff", "refresh required:" + stateRefreshRequired);
+
         return stateRefreshRequired;
 
 

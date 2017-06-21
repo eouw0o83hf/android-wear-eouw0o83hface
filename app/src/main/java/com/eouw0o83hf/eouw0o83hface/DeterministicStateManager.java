@@ -62,6 +62,11 @@ public class DeterministicStateManager {
             }
         }
 
+        // If the initialization takes longer than a frame to spin up
+        if(referenceValue == null) {
+            referenceValue = false;
+        }
+
         if(!allEqual) {
             return;
         } else if(referenceValue) {
