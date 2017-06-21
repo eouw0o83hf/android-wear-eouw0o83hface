@@ -338,8 +338,11 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             mTextPaint.setColor(Color.WHITE);
             mDatePaint.setColor(Color.WHITE);
 
-//            mTextPaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
-//            mDatePaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
+//            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.BLACK);
+//            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.BLACK);
+
+            mTextPaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
+            mDatePaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
 
             canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
             canvas.drawText(dayText, mXOffset, mYOffset / 2, mDatePaint);
