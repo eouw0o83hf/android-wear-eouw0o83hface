@@ -36,7 +36,22 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         public Polygon(ArrayList<Foint> bounds) {
             Bounds = bounds;
         }
+
         public ArrayList<Foint> Bounds;
+
+        // Pulled from http://www.mathopenref.com/coordpolygonarea2.html
+        public float Area() {
+            float area = 0f;
+            int previous = Bounds.size() - 1;
+
+            for(int i = 0; i < Bounds.size(); ++i) {
+                area += (Bounds.get(previous).X + Bounds.get(i).X) *
+                        (Bounds.get(previous).Y - Bounds.get(i).Y);
+                previous = i;
+            }
+
+            return area / 2;
+        }
     }
 
     // TODO rename because "Abstract" is great as the artistic word
@@ -89,6 +104,21 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         public boolean GetActive() {
             return _isActive;
         }
+
+
+        // Pulled from http://www.mathopenref.com/coordpolygonarea2.html
+        public float Area() {
+            float area = 0f;
+            int previous = _verteces.size() - 1;
+
+            for(int i = 0; i < _verteces.size(); ++i) {
+                area += (_verteces.get(previous).X + _verteces.get(i).X) *
+                        (_verteces.get(previous).Y - _verteces.get(i).Y);
+                previous = i;
+            }
+
+            return area / 2;
+        }
     }
 
     public void Initialize() {
@@ -104,7 +134,18 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
         for(int targetIndex = 0; targetIndex < NumberOfShapes - 1; ++targetIndex) {
 
-            int realTargetIndex = random.nextInt(updatedPolygonThings.size());
+//            int realTargetIndex = random.nextInt(updatedPolygonThings.size());
+
+            // Break up the shape with the largest area #socialism
+            int realTargetIndex = 0;
+            float maxArea = 0;
+            for(int i = 0; i < updatedPolygonThings.size(); ++i) {
+                float currentArea = updatedPolygonThings.get(i).Area();
+                if(currentArea > maxArea) {
+                    realTargetIndex = i;
+                    maxArea = currentArea;
+                }
+            }
 
             AbstractBackgroundPolygon target = updatedPolygonThings.get(realTargetIndex);
 
@@ -120,17 +161,13 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
             Foint edge2Point1 = targetVerteces.get(edge2);
             Foint edge2Point2 = targetVerteces.get((edge2 + 1) % targetVerteces.size());
 
-            // TODO At least one of these needs to be biased toward the middle of the
-            // line (middle of the bounds?) , otherwise randomness winds up working
-            // against the design and clumping all of the shapes off of the watchface
-
-            float percent1 = random.nextFloat();
+            float percent1 = nextBiasedRandom();
             Foint newPoint1 = new Foint(
                     edge1Point1.X + ((edge1Point2.X - edge1Point1.X) * percent1),
                     edge1Point1.Y + ((edge1Point2.Y - edge1Point1.Y) * percent1)
             );
 
-            float percent2 = random.nextFloat();
+            float percent2 = nextBiasedRandom();
             Foint newPoint2 = new Foint(
                     edge2Point1.X + ((edge2Point2.X - edge2Point1.X) * percent2),
                     edge2Point1.Y + ((edge2Point2.Y - edge2Point1.Y) * percent2)
@@ -189,8 +226,21 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
     }
 
     private ArrayList<AbstractBackgroundPolygon> polygonThings = new ArrayList<>(1);
-    private final int NumberOfShapes = 6;
+    private final int NumberOfShapes = 8;
+
     private Random random = new Random();
+    private float nextBiasedRandom() {
+        // Quadratic, points at (0,0) (0.5,0.5) (1,0)
+        float floatValue = random.nextFloat();
+
+        float quadraticOutput =  (-2 * (floatValue * floatValue)) + (2 * floatValue);
+        if(floatValue > 0.5f) {
+            // Flip the right half of the curve so it makes it all the way up to (1,1)
+            quadraticOutput = 1f - quadraticOutput;
+        }
+
+        return quadraticOutput;
+    }
 
     @Override
     public Collection<? extends BackgroundShape> getBackgroundShapes() {

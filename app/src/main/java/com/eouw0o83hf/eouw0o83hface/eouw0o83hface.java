@@ -46,6 +46,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import static com.eouw0o83hf.eouw0o83hface.DeterministicStateManager.VisualState.Ambient;
+import static com.eouw0o83hf.eouw0o83hface.DeterministicStateManager.VisualState.Interactive;
 
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
@@ -331,18 +332,14 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             String dayText = String.format("%s %02d", new DateFormatSymbols().getMonths()[mTime.month].substring(0, 3), mTime.monthDay);
 
             mXOffset = bounds.width() / 2;
-            //mYOffset = bounds.height() / 2;
 //            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
 //            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
 
             mTextPaint.setColor(Color.WHITE);
             mDatePaint.setColor(Color.WHITE);
 
-//            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.BLACK);
-//            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.BLACK);
-
-            mTextPaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
-            mDatePaint.setFakeBoldText(!mStateManager.IsInAmbientMode());
+            mTextPaint.setFakeBoldText(mStateManager.GetState() == Interactive);
+            mDatePaint.setFakeBoldText(mStateManager.GetState() == Interactive);
 
             canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
             canvas.drawText(dayText, mXOffset, mYOffset / 2, mDatePaint);
