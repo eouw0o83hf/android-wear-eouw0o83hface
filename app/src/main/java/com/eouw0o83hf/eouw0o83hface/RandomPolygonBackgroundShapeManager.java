@@ -4,15 +4,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Random;
 
 public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManager {
@@ -30,40 +27,14 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         public float Y;
     }
 
-    // An abstraction of a polygon, as defined by the collection
-    // of points which mark its verteces
-    private class Polygon {
-        public Polygon(ArrayList<Foint> bounds) {
-            Bounds = bounds;
-        }
-
-        public ArrayList<Foint> Bounds;
-
-        // Pulled from http://www.mathopenref.com/coordpolygonarea2.html
-        public float Area() {
-            float area = 0f;
-            int previous = Bounds.size() - 1;
-
-            for(int i = 0; i < Bounds.size(); ++i) {
-                area += (Bounds.get(previous).X + Bounds.get(i).X) *
-                        (Bounds.get(previous).Y - Bounds.get(i).Y);
-                previous = i;
-            }
-
-            return area / 2;
-        }
-    }
-
-    // TODO rename because "Abstract" is great as the artistic word
-    // but a bad name for this class
-    // The actual Shape implementation.
-    private class AbstractBackgroundPolygon implements BackgroundShape {
+    // The actual Shape implementation
+    private class BackgroundPolygon implements BackgroundShape {
 
         private ArrayList<Foint> _verteces;
         private int _color;
         private boolean _isActive = true;
 
-        public AbstractBackgroundPolygon(ArrayList<Foint> verteces) {
+        public BackgroundPolygon(ArrayList<Foint> verteces) {
             _verteces = verteces;
         }
 
@@ -119,6 +90,23 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
             return area / 2;
         }
+
+        public Foint GetRandomPointOnEdge(int anchorVertexIndex) {
+
+            Foint anchorPoint = _verteces.get(anchorVertexIndex);
+            Foint nextPoint = _verteces.get((anchorVertexIndex + 1) % _verteces.size());
+            float percent1 = nextBiasedRandom();
+            return new Foint(
+                    anchorPoint.X + ((nextPoint.X - anchorPoint.X) * percent1),
+                    anchorPoint.Y + ((nextPoint.Y - anchorPoint.Y) * percent1)
+            );
+        }
+
+//        // Splits this polygon into two along the line denoted by
+//        // the given points
+//        public ArrayList<Foint> Split(Foint point1, Foint point2) {
+//
+//        }
     }
 
     public void Initialize() {
@@ -129,49 +117,50 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 new Foint(_bounds.right, _bounds.bottom),
                 new Foint(_bounds.right, _bounds.top)));
 
-        ArrayList<AbstractBackgroundPolygon> updatedPolygonThings = new ArrayList<>(1);
-        updatedPolygonThings.add(new AbstractBackgroundPolygon(verteces));
+        // We need to do a reference swap for the refresh so that we don't
+        // encounter a write/read race condition between rendering and refreshing
+        ArrayList<BackgroundPolygon> updatedPolygons = new ArrayList<>(1);
 
-        for(int targetIndex = 0; targetIndex < NumberOfShapes - 1; ++targetIndex) {
+        // Start with a single polygon which encompasses the entirety of the canvas
+        updatedPolygons.add(new BackgroundPolygon(verteces));
 
-//            int realTargetIndex = random.nextInt(updatedPolygonThings.size());
+        // Find the largest polygon by area and
+        // split it into two smaller polygons. Replace the original one in the list
+        // with the two sub-shapes instead. Do this until we've filled the list.
+        while(updatedPolygons.size() < NumberOfShapes - 1) {
 
-            // Break up the shape with the largest area #socialism
-            int realTargetIndex = 0;
+            Log.i("Updating polygon", "#" + updatedPolygons.size());
+
+            // It'd be really nice if Java had some sort of linq syntax...
+            // This just finds the
+            int targetIndex = 0;
             float maxArea = 0;
-            for(int i = 0; i < updatedPolygonThings.size(); ++i) {
-                float currentArea = updatedPolygonThings.get(i).Area();
+            for(int i = 0; i < updatedPolygons.size(); ++i) {
+                float currentArea = updatedPolygons.get(i).Area();
                 if(currentArea > maxArea) {
-                    realTargetIndex = i;
+                    targetIndex = i;
                     maxArea = currentArea;
                 }
             }
 
-            AbstractBackgroundPolygon target = updatedPolygonThings.get(realTargetIndex);
+            BackgroundPolygon targetPolygon = updatedPolygons.get(targetIndex);
 
-            ArrayList<Foint> targetVerteces = target.GetVerteces();
+            // Randomly select two sides of the target polygon to run
+            // a split through. This first section just determines anchor
+            // verteces to use
+            ArrayList<Foint> targetVerteces = targetPolygon.GetVerteces();
             int edge1 = random.nextInt(targetVerteces.size());
             int edge2 = random.nextInt(targetVerteces.size());
+            // Can't allow both sides to be the same side. Rather than
+            // while()ing until they're different, just handle the one-
+            // off situation. Yes, this makes the randomness effect
+            // a little non-homogeneous, but it shouldn't be noticeable.
             if (edge2 == edge1) {
                 edge2 = (edge2 + 1) % targetVerteces.size();
             }
 
-            Foint edge1Point1 = targetVerteces.get(edge1);
-            Foint edge1Point2 = targetVerteces.get((edge1 + 1) % targetVerteces.size());
-            Foint edge2Point1 = targetVerteces.get(edge2);
-            Foint edge2Point2 = targetVerteces.get((edge2 + 1) % targetVerteces.size());
-
-            float percent1 = nextBiasedRandom();
-            Foint newPoint1 = new Foint(
-                    edge1Point1.X + ((edge1Point2.X - edge1Point1.X) * percent1),
-                    edge1Point1.Y + ((edge1Point2.Y - edge1Point1.Y) * percent1)
-            );
-
-            float percent2 = nextBiasedRandom();
-            Foint newPoint2 = new Foint(
-                    edge2Point1.X + ((edge2Point2.X - edge2Point1.X) * percent2),
-                    edge2Point1.Y + ((edge2Point2.Y - edge2Point1.Y) * percent2)
-            );
+            Foint newPoint1 = targetPolygon.GetRandomPointOnEdge(edge1);
+            Foint newPoint2 = targetPolygon.GetRandomPointOnEdge(edge2);
 
             ArrayList<Foint> polygon1Foints = new ArrayList<>(1);
             polygon1Foints.add(newPoint1);
@@ -182,7 +171,6 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 }
             }
             polygon1Foints.add(newPoint2);
-            Polygon newPolygon1 = new Polygon(polygon1Foints);
 
             ArrayList<Foint> polygon2Foints = new ArrayList<>(1);
             polygon2Foints.add(newPoint2);
@@ -193,12 +181,10 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 }
             }
             polygon2Foints.add(newPoint1);
-            Polygon newPolygon2 = new Polygon(polygon2Foints);
 
-
-            updatedPolygonThings.remove(realTargetIndex);
-            updatedPolygonThings.add(new AbstractBackgroundPolygon(newPolygon1.Bounds));
-            updatedPolygonThings.add(new AbstractBackgroundPolygon(newPolygon2.Bounds));
+            updatedPolygons.remove(targetIndex);
+            updatedPolygons.add(new BackgroundPolygon(polygon1Foints));
+            updatedPolygons.add(new BackgroundPolygon(polygon2Foints));
         }
 
         int[] colors = new int[] {
@@ -211,21 +197,22 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 0xFFFF9800,
                 0xFF607D8B
         };
-        for(int i = 0; i < updatedPolygonThings.size(); ++i) {
-            // Reverse them so rendering goes small-to-large
-            AbstractBackgroundPolygon source = updatedPolygonThings.get(updatedPolygonThings.size() - i - 1);
 
-            if(polygonThings.size() <= i) {
-                polygonThings.add(new AbstractBackgroundPolygon(source.GetVerteces()));
+        for(int i = 0; i < updatedPolygons.size(); ++i) {
+            // Reverse them so rendering goes small-to-large
+            BackgroundPolygon source = updatedPolygons.get(updatedPolygons.size() - i - 1);
+
+            if(backgroundPolygons.size() <= i) {
+                backgroundPolygons.add(new BackgroundPolygon(source.GetVerteces()));
             } else {
-                polygonThings.get(i).SetVerteces(source.GetVerteces());
+                backgroundPolygons.get(i).SetVerteces(source.GetVerteces());
             }
 
-            polygonThings.get(i).SetColor(colors[i]);
+            backgroundPolygons.get(i).SetColor(colors[i]);
         }
     }
 
-    private ArrayList<AbstractBackgroundPolygon> polygonThings = new ArrayList<>(1);
+    private ArrayList<BackgroundPolygon> backgroundPolygons = new ArrayList<>(1);
     private final int NumberOfShapes = 8;
 
     private Random random = new Random();
@@ -244,7 +231,7 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 
     @Override
     public Collection<? extends BackgroundShape> getBackgroundShapes() {
-        return polygonThings;
+        return backgroundPolygons;
     }
 
     @Override
@@ -267,13 +254,13 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         boolean stateRefreshRequired = false;
         boolean activeToggle = _state == StateChangeStatus.TurningOn;
 
-        for(int i = 0 ; i < polygonThings.size(); ++i) {
-            AbstractBackgroundPolygon s = polygonThings.get(i);
+        for(int i = 0; i < backgroundPolygons.size(); ++i) {
+            BackgroundPolygon s = backgroundPolygons.get(i);
             if(s.GetActive() != activeToggle) {
                 s.SetActive(activeToggle);
                 stateRefreshRequired = true;
                 break;
-            } else if(i == polygonThings.size() - 1) {
+            } else if(i == backgroundPolygons.size() - 1) {
                 incrementState(StateChangeStatus.Neutral);
                 break;
             }
