@@ -1,10 +1,8 @@
+package com.eouw0o83hf.eouw0o83hface;
+
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-
-import com.eouw0o83hf.eouw0o83hface.BackgroundShape;
-import com.eouw0o83hf.eouw0o83hface.BackgroundShapeManager;
-import com.eouw0o83hf.eouw0o83hface.DeterministicStateManager;
 
 import junit.framework.TestCase;
 

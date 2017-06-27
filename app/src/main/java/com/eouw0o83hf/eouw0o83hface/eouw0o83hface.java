@@ -38,6 +38,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.eouw0o83hf.eouw0o83hface.backgrounds.polygon.PolygonsBackgroundShapeManager;
+
 import java.lang.ref.WeakReference;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
@@ -72,7 +74,7 @@ public class eouw0o83hface extends CanvasWatchFaceService {
 
 
     //BackgroundShapeManager shapeManager = new PlaidBackgroundStateManager();
-    BackgroundShapeManager shapeManager = new RandomPolygonBackgroundShapeManager();
+    BackgroundShapeManager shapeManager = new PolygonsBackgroundShapeManager();
 
     @Override
     public Engine onCreateEngine() {
