@@ -1,7 +1,9 @@
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 
 import com.eouw0o83hf.eouw0o83hface.BackgroundShape;
+import com.eouw0o83hf.eouw0o83hface.BackgroundShapeManager;
 import com.eouw0o83hf.eouw0o83hface.DeterministicStateManager;
 
 import junit.framework.TestCase;
@@ -24,8 +26,8 @@ public class DeterministicStateManagerTests extends TestCase {
     }
 
     private class CheaterDeterministicStateManager extends DeterministicStateManager {
-        public CheaterDeterministicStateManager(Collection<? extends BackgroundShape> background) {
-            super(background);
+        public CheaterDeterministicStateManager(Collection<TestBackgroundShape> background) {
+            super(new TestBackgroundManager(background));
         }
 
         public void ChangeState(VisualState state) {
@@ -44,6 +46,32 @@ public class DeterministicStateManagerTests extends TestCase {
         public boolean GetActive() {
             return IsActive;
         }
+    }
+
+    private class TestBackgroundManager implements BackgroundShapeManager {
+
+        private final Collection<TestBackgroundShape> _background;
+
+        public TestBackgroundManager(Collection<TestBackgroundShape> background) {
+            _background = background;
+        }
+
+        @Override
+        public Collection<? extends BackgroundShape> getBackgroundShapes() {
+            return _background;
+        }
+
+        @Override
+        public void initialize(Rect bounds) { }
+
+        @Override
+        public void randomize() { }
+
+        @Override
+        public boolean turnOnOrOff() { return false; }
+
+        @Override
+        public void incrementState(StateChangeStatus changeStatus) { }
     }
 
     public void test_state_defaultsToInteractive() {

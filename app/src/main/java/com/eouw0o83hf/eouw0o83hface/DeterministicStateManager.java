@@ -13,10 +13,10 @@ public class DeterministicStateManager {
         LeavingInteractive
     }
 
-    private final Collection<? extends BackgroundShape> _background;
+    private final BackgroundShapeManager _backgroundShapeManager;
 
-    public DeterministicStateManager(Collection<? extends BackgroundShape> background) {
-        _background = background;
+    public DeterministicStateManager(BackgroundShapeManager backgroundShapeManager) {
+        _backgroundShapeManager = backgroundShapeManager;
         _state = VisualState.Interactive;
     }
 
@@ -53,7 +53,7 @@ public class DeterministicStateManager {
         // Boolean because null means something here
         Boolean referenceValue = null;
         boolean allEqual = true;
-        for (BackgroundShape backgroundShape : _background) {
+        for (BackgroundShape backgroundShape : _backgroundShapeManager.getBackgroundShapes()) {
             if(referenceValue == null) {
                 referenceValue = backgroundShape.GetActive();
             } else if(backgroundShape.GetActive() != referenceValue.booleanValue()) {

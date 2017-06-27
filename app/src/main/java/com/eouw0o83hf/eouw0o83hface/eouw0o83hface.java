@@ -93,7 +93,7 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         };
 
         //final VisualStateManager mStateManager = new VisualStateManager() {
-        final DeterministicStateManager mStateManager = new DeterministicStateManager(shapeManager.getBackgroundShapes()) {
+        final DeterministicStateManager mStateManager = new DeterministicStateManager(shapeManager) {
             @Override
             protected void ChangeModeTo(VisualState state) {
                 VisualState from = GetState();

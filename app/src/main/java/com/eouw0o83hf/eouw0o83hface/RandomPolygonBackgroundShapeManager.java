@@ -34,8 +34,9 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         private int _color;
         private boolean _isActive = true;
 
-        public BackgroundPolygon(ArrayList<Foint> verteces) {
+        public BackgroundPolygon(ArrayList<Foint> verteces, boolean isActive) {
             _verteces = verteces;
+            _isActive = isActive;
         }
 
         public void SetColor(int color) {
@@ -109,7 +110,7 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
 //        }
     }
 
-    public void Initialize() {
+    public void Initialize(boolean initialLoad) {
 
         ArrayList<Foint> verteces = new ArrayList<>(Arrays.asList(
                 new Foint(_bounds.left, _bounds.top),
@@ -122,14 +123,14 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         ArrayList<BackgroundPolygon> updatedPolygons = new ArrayList<>(1);
 
         // Start with a single polygon which encompasses the entirety of the canvas
-        updatedPolygons.add(new BackgroundPolygon(verteces));
+        updatedPolygons.add(new BackgroundPolygon(verteces, initialLoad));
+
+        int nextShapeCount = nextNumberOfShapes();
 
         // Find the largest polygon by area and
         // split it into two smaller polygons. Replace the original one in the list
         // with the two sub-shapes instead. Do this until we've filled the list.
-        while(updatedPolygons.size() < NumberOfShapes - 1) {
-
-            Log.i("Updating polygon", "#" + updatedPolygons.size());
+        while(updatedPolygons.size() < nextShapeCount - 1) {
 
             // It'd be really nice if Java had some sort of linq syntax...
             // This just finds the
@@ -183,8 +184,8 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
             polygon2Foints.add(newPoint1);
 
             updatedPolygons.remove(targetIndex);
-            updatedPolygons.add(new BackgroundPolygon(polygon1Foints));
-            updatedPolygons.add(new BackgroundPolygon(polygon2Foints));
+            updatedPolygons.add(new BackgroundPolygon(polygon1Foints, initialLoad));
+            updatedPolygons.add(new BackgroundPolygon(polygon2Foints, initialLoad));
         }
 
         int[] colors = new int[] {
@@ -198,22 +199,34 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
                 0xFF607D8B
         };
 
+        // Set colors now that the population is solidified
         for(int i = 0; i < updatedPolygons.size(); ++i) {
-            // Reverse them so rendering goes small-to-large
-            BackgroundPolygon source = updatedPolygons.get(updatedPolygons.size() - i - 1);
-
-            if(backgroundPolygons.size() <= i) {
-                backgroundPolygons.add(new BackgroundPolygon(source.GetVerteces()));
-            } else {
-                backgroundPolygons.get(i).SetVerteces(source.GetVerteces());
-            }
-
-            backgroundPolygons.get(i).SetColor(colors[i]);
+            updatedPolygons.get(i).SetColor(colors[i]);
         }
+        backgroundPolygons = updatedPolygons;
+
+//        for(int i = 0; i < updatedPolygons.size(); ++i) {
+//            // Reverse them so rendering goes small-to-large
+//            BackgroundPolygon source = updatedPolygons.get(updatedPolygons.size() - i - 1);
+//
+//            if(backgroundPolygons.size() <= i) {
+//                backgroundPolygons.add(new BackgroundPolygon(source.GetVerteces()));
+//            } else {
+//                backgroundPolygons.get(i).SetVerteces(source.GetVerteces());
+//            }
+//
+//            backgroundPolygons.get(i).SetColor(colors[i]);
+//        }
     }
 
     private ArrayList<BackgroundPolygon> backgroundPolygons = new ArrayList<>(1);
-    private final int NumberOfShapes = 8;
+//    private final int NumberOfShapes = 8;
+
+    private final int MaxNumberOfShapes = 10;
+    private final int MinNumberOfShapes = 4;
+    private int nextNumberOfShapes() {
+        return random.nextInt(MaxNumberOfShapes - MinNumberOfShapes) + MinNumberOfShapes;
+    }
 
     private Random random = new Random();
     private float nextBiasedRandom() {
@@ -238,14 +251,14 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
     public void initialize(Rect bounds) {
         if(_state == StateChangeStatus.NotInitialized) {
             _bounds = bounds;
-            Initialize();
+            Initialize(true);
             _state = StateChangeStatus.Neutral;
         }
     }
 
     @Override
     public void randomize() {
-        Initialize();
+        Initialize(false);
     }
 
     @Override
@@ -254,13 +267,19 @@ public class RandomPolygonBackgroundShapeManager implements BackgroundShapeManag
         boolean stateRefreshRequired = false;
         boolean activeToggle = _state == StateChangeStatus.TurningOn;
 
-        for(int i = 0; i < backgroundPolygons.size(); ++i) {
-            BackgroundPolygon s = backgroundPolygons.get(i);
+        // Make a local in case the underlying collection changes during the
+        // evaluation. This is unlikely but conceivable since we're working
+        // in an event-based paradigm, and the collection is updated in a
+        // different event chain.
+        ArrayList<BackgroundPolygon> localPolygons = new ArrayList<>(backgroundPolygons);
+
+        for(int i = 0; i < localPolygons.size(); ++i) {
+            BackgroundPolygon s = localPolygons.get(i);
             if(s.GetActive() != activeToggle) {
                 s.SetActive(activeToggle);
                 stateRefreshRequired = true;
                 break;
-            } else if(i == backgroundPolygons.size() - 1) {
+            } else if(i == localPolygons.size() - 1) {
                 incrementState(StateChangeStatus.Neutral);
                 break;
             }
