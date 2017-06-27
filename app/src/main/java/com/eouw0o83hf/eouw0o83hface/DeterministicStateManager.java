@@ -20,7 +20,7 @@ public class DeterministicStateManager {
         _state = VisualState.Interactive;
     }
 
-    private VisualState _state;
+    private VisualState _state = VisualState.Interactive;
     public VisualState GetState() {
         return _state;
     }
