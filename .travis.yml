@@ -1,6 +1,11 @@
 language: android
 jdk:
   - oraclejdk8
+android:
+  components:
+    - build-tools-25.0.0
+    - android-23
+    - sys-img-armeabi-v7a-android-23
 script:
   - java -version
   - ./gradlew build
