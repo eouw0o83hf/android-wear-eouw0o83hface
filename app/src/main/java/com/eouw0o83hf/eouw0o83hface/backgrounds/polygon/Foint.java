@@ -9,4 +9,12 @@ public class Foint {
 
     public float X;
     public float Y;
+
+    @Override
+    public boolean equals(Object o) {
+        // If you passed in something that's not a Foint, you're gonna have a bad time
+
+        Foint f = (Foint)o;
+        return f.X == X && f.Y == Y;
+    }
 }

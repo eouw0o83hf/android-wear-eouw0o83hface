@@ -4,6 +4,8 @@ import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class BackgroundPolygonTests extends TestCase {
 
@@ -38,5 +40,23 @@ public class BackgroundPolygonTests extends TestCase {
 
         BackgroundPolygon sut = new BackgroundPolygon(verteces, true);
         assertEquals(0.75f, sut.Area());
+    }
+
+    public void test_Split_DoesNotDestroyTheWorld() {
+        // A 1x1 square
+        ArrayList<Foint> verteces = new ArrayList<>(Arrays.asList(
+                new Foint(0, 0),
+                new Foint(0, 1),
+                new Foint(1, 1),
+                new Foint(1, 0)
+        ));
+
+        BackgroundPolygon sut = new BackgroundPolygon(verteces, true);
+        Collection<BackgroundPolygon> splits = sut.Split();
+
+        ArrayList<Foint> otherFoints = new ArrayList<>(0);
+        for (BackgroundPolygon split : splits) {
+            split.GetVerteces();
+        }
     }
 }

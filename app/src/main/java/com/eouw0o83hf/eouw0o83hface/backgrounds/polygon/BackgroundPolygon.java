@@ -29,6 +29,10 @@ public class BackgroundPolygon implements BackgroundShape {
         _color = color;
     }
 
+    public ArrayList<Foint> GetVerteces() {
+        return _verteces;
+    }
+
     @Override
     public void Render(Canvas canvas, Paint sharedPaint) {
         Path perimeter = new Path();
@@ -50,7 +54,6 @@ public class BackgroundPolygon implements BackgroundShape {
     public boolean GetActive() {
         return _isActive;
     }
-
 
     // Pulled from http://www.mathopenref.com/coordpolygonarea2.html
     public float Area() {
