@@ -39,7 +39,7 @@ public class BackgroundPolygonTests extends TestCase {
         ));
 
         BackgroundPolygon sut = new BackgroundPolygon(verteces, true);
-        assertEquals(0.75f, sut.Area());
+        assertEquals(0.15f, sut.Area());
     }
 
     public void test_Split_DoesNotDestroyTheWorld() {
