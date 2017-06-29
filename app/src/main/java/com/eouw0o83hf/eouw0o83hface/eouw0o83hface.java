@@ -38,10 +38,17 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.eouw0o83hf.eouw0o83hface.backgrounds.polygon.PolygonsBackgroundShapeManager;
+
 import java.lang.ref.WeakReference;
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import static com.eouw0o83hf.eouw0o83hface.DeterministicStateManager.VisualState.Ambient;
+import static com.eouw0o83hf.eouw0o83hface.DeterministicStateManager.VisualState.Interactive;
 
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
@@ -61,10 +68,19 @@ public class eouw0o83hface extends CanvasWatchFaceService {
      */
     private static final int MSG_UPDATE_TIME = 0;
 
+
+    Random random = new Random();
+    float grayControl = 0.5f;
+
+
+    //BackgroundShapeManager shapeManager = new PlaidBackgroundStateManager();
+    BackgroundShapeManager shapeManager = new PolygonsBackgroundShapeManager();
+
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
+
 
     @SuppressWarnings("deprecation")
     private class Engine extends CanvasWatchFaceService.Engine {
@@ -78,7 +94,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             }
         };
 
-        final VisualStateManager mStateManager = new VisualStateManager() {
+        //final VisualStateManager mStateManager = new VisualStateManager() {
+        final DeterministicStateManager mStateManager = new DeterministicStateManager(shapeManager) {
             @Override
             protected void ChangeModeTo(VisualState state) {
                 VisualState from = GetState();
@@ -218,15 +235,33 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             mStateManager.AmbientModeChanged(inAmbientMode);
         }
 
-        private void HandleStateChange(VisualStateManager.VisualState from, VisualStateManager.VisualState to) {
+        private void HandleStateChange(DeterministicStateManager.VisualState from, DeterministicStateManager.VisualState to) {
             if(from == to) {
                 return;
             }
 
             if(mLowBitAmbient) {
-                mTextPaint.setAntiAlias(to != VisualStateManager.VisualState.Ambient);
-                mDatePaint.setAntiAlias(to != VisualStateManager.VisualState.Ambient);
+                mTextPaint.setAntiAlias(to != DeterministicStateManager.VisualState.Ambient);
+                mDatePaint.setAntiAlias(to != DeterministicStateManager.VisualState.Ambient);
             }
+
+            switch (to) {
+                case Ambient:
+                    shapeManager.randomize();
+                    break;
+
+                case LeavingInteractive:
+                    shapeManager.incrementState(BackgroundShapeManager.StateChangeStatus.TurningOff);
+                    break;
+
+                case EnteringInteractive:
+                    shapeManager.incrementState(BackgroundShapeManager.StateChangeStatus.TurningOn);
+                    break;
+
+                default:
+                    break;
+            }
+
 
             invalidate();
             updateTimer();
@@ -235,19 +270,62 @@ public class eouw0o83hface extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 
+            shapeManager.initialize(bounds);
+            boolean stateRefreshRequired = false;
+
+            switch (mStateManager.GetState()) {
+                case LeavingInteractive:
+                case EnteringInteractive:
+                    stateRefreshRequired = shapeManager.turnOnOrOff();
+                    break;
+
+                default:
+                    break;
+            }
+
             // Draw the background.
             if(mStateManager.IsInAmbientMode()) {
-                mBackgroundPaint.setShader(null);
+//                mBackgroundPaint.setShader(null);
                 mBackgroundPaint.setColor(Color.BLACK);
+                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
             } else {
-                float[] hsv = new float[3];
-                Color.colorToHSV(mGradientTopColor, hsv);
-                hsv[0] = (hsv[0] + 0.5f) % 360;
-                mGradientTopColor = Color.HSVToColor(hsv);
 
-                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), mGradientTopColor, mGradientBottomColor, Shader.TileMode.MIRROR));
+                //# Original single rolling gradient
+//                float[] hsv = new float[3];
+//                Color.colorToHSV(mGradientTopColor, hsv);
+//                hsv[0] = (hsv[0] + 0.5f) % 360;
+//                mGradientTopColor = Color.HSVToColor(hsv);
+//
+//                mBackgroundPaint.setShader(new LinearGradient(0, 0, 0, bounds.height(), mGradientTopColor, mGradientBottomColor, Shader.TileMode.MIRROR));
+//                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+
+
+//                //# Gradient squares
+//                int sections = 5;
+//                int heightSection = bounds.height() / sections;
+//                int widthSection = bounds.width() / sections;
+//                for(int i = 0; i < sections; ++i) {
+//                    for(int j = 0; j < sections; ++j) {
+//                        float[] hsv = new float[3];
+//                        Color.colorToHSV(mGradientTopColor, hsv);
+//                        hsv[0] = (hsv[0] + 0.5f) % 360;
+//                        mGradientTopColor = Color.HSVToColor(hsv);
+//
+//
+//                        mBackgroundPaint.setShader(new LinearGradient(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1), mGradientTopColor, mGradientBottomColor, Shader.TileMode.MIRROR));
+//                        canvas.drawRect(widthSection * i, heightSection * j, widthSection * (i + 1), heightSection * (j + 1), mBackgroundPaint);
+//                    }
+//                }
+
+
+                for (BackgroundShape shape : shapeManager.getBackgroundShapes()) {
+                    shape.Render(canvas, mBackgroundPaint);
+                }
             }
-            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+
+            if(stateRefreshRequired) {
+                mStateManager.RefreshStateFromBackground();
+            }
 
             mTime.setToNow();
 
@@ -255,13 +333,15 @@ public class eouw0o83hface extends CanvasWatchFaceService {
             String text = String.format("%d:%02d", ((mTime.hour + 11) % 12) + 1, mTime.minute);
             String dayText = String.format("%s %02d", new DateFormatSymbols().getMonths()[mTime.month].substring(0, 3), mTime.monthDay);
 
-//            String text = mAmbient
-//                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-//                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
             mXOffset = bounds.width() / 2;
-            //mYOffset = bounds.height() / 2;
-            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
-            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
+//            mTextPaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
+//            mDatePaint.setColor(mStateManager.IsInAmbientMode() ? Color.WHITE : Color.LTGRAY);
+
+            mTextPaint.setColor(Color.WHITE);
+            mDatePaint.setColor(Color.WHITE);
+
+            mTextPaint.setFakeBoldText(mStateManager.GetState() == Interactive);
+            mDatePaint.setFakeBoldText(mStateManager.GetState() == Interactive);
 
             canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
             canvas.drawText(dayText, mXOffset, mYOffset / 2, mDatePaint);
