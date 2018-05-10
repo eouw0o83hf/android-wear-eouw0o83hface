@@ -79,7 +79,7 @@ public class PolygonsBackgroundShapeManager implements BackgroundShapeManager {
     Rect _bounds = null;
 
     private final int MaxNumberOfShapes = 10;
-    private final int MinNumberOfShapes = 4;
+    private final int MinNumberOfShapes = 3;
 
     // Gets a random number of next shapes to generate
     private int nextNumberOfShapes() {
