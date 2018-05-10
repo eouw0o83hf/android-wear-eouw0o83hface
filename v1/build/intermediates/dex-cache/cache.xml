@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/d93da3cc15f551cbe5141cc1a2a8e742604c7bc6/output/jars/libs/internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="3b61a70884adaf0be3fc06c70c801e3e6df13133">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/internal_impl-25.0.0_6fffbaf21332e842ff2820ee1f8d7ad9df4096ad/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/d975596d682c56ddcaea147dbede743de9979166/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="53a420cd4f49274db6bd43475f8006ba67ef6bbd">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_c57cfb121c80c365bbec739698803cb3687a8f10/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="c4df6794bffafd60ce4941e0f7a38bbbe9bd7bea">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_1dbd9875b18efb940429f8b02d93ab0d95ed1382/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/1b8582ccd29b3843d9d900c4be0f204ea25dc86b/output/jars/libs/internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="665d21a8a069c96b4d9e8b434f5096d865b4e261">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/internal_impl-25.0.0_192a31ab5cdec20e7bbd01030aec48de12dbc1b8/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/611e7931596d51ca44af188c208edf386f706cac/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="8bc45ce1f63d1a391fd38b32a201be5a42f9c95d">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_a565ae5c7ae8f91c52f2c950f2b4db9a6e415db1/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/8f0741b01dec59703c4222e97c3a8dcba36b7f1d/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_72fe9fb147001cbb6249fc015222438e5183a5ed/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/25.0.0/support-annotations-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="a22d2cc94da87b254451fa8ed28afc30b4653773">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/support-annotations-25.0.0_056cb4e6e56f810f972db34f11653775d81feb39/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/9ab923bb469e13c44f2f984aa623ddd882225f60/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="d29714cc76b38157e3cbd034c66e1ec808eb4c19">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_facd7bf623b648aeb9f878d44da6af62a47a06b0/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="caff8e51a24901cfc9cd7e1cf83d84f4cb0c103b">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_0e6e3861252591fdf25c84df664db261ad909854/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/361d78965cd6562320402e7e5cec61b5348741cd/output/jars/libs/internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="f2e3b9bc1ec25f652e8007ce7774c991e38f6a00">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/internal_impl-25.0.0_e864759f0a0ddb1c258e199f27bd419e4c181a42/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/1b8582ccd29b3843d9d900c4be0f204ea25dc86b/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="76fb65a4b41ea42dab8a1310ed772a2420c96b52">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_66cb4f687afbbbbfd3cf1357c1d63930c0d3b9ce/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/145ea5f6601cfe6f8df33b92c061f1c1f484b188/output/jars/libs/internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="e5343c9d19cb19ff55f6b268c7f3fe8c9d224f6f">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/internal_impl-25.0.0_292ab13a94e3ce1eb812121c81352ccb89d3a131/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/0fc231de2e17d05a858d81afea960188b1ec7add/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="07daa0b6e1d455c82a38422ffe287c18823d339a">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_4c105c1bf6ae5e27edb2e24f0929cb45afef0346/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/0fc231de2e17d05a858d81afea960188b1ec7add/output/jars/libs/internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="ee5faf4dee5b6a4364bf51587871047dde7c703a">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/internal_impl-25.0.0_409c16bc10591d216d013805a25df8c04b4f1f26/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/361d78965cd6562320402e7e5cec61b5348741cd/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="75b1f366ff0bbc78f8b1f7cf0dc82e7c53afef6a">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_bbfdebdb69fd7c375e1e11cce80f7ebd6ad52f0a/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/d93da3cc15f551cbe5141cc1a2a8e742604c7bc6/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="4ccbcda5c72027c7f7c14be9ff8640d9cb0d8da0">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_276a6afbdffca4a2161a7dc69d1cf0c34b3514f9/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/nathanlandis/.android/build-cache/145ea5f6601cfe6f8df33b92c061f1c1f484b188/output/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="26674000177e45447a0326a6ad84612761199a13">
+        <dex dex="/Users/nathanlandis/Code/android-wear-eouw0o83hface/app/build/intermediates/transforms/dex/debug/folders/1000/10/classes_32d6c43737b5968f789cdf9f564f6729ae8da984/classes.dex" />
+    </item>
+
+</items>
