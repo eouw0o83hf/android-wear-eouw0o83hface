@@ -1,4 +1,4 @@
-package com.example.nathanlandis.eouw0o83hface;
+package com.eouw0o83hf.eouw0o83hface;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +26,8 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import com.eouw0o83hf.eouw0o83hface.polygon.PolygonsBackgroundShapeManager;
+
 /**
  * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
  * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
@@ -51,6 +53,8 @@ public class eouw0o83hface extends CanvasWatchFaceService {
      * Handler message id for updating the time periodically in interactive mode.
      */
     private static final int MSG_UPDATE_TIME = 0;
+
+    BackgroundShapeManager shapeManager = new PolygonsBackgroundShapeManager();
 
     @Override
     public Engine onCreateEngine() {

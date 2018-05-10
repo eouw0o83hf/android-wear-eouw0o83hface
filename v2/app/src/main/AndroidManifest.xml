@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.nathanlandis.eouw0o83hface">
+    package="com.eouw0o83hf.eouw0o83hface">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
